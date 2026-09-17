@@ -33,7 +33,7 @@ interface QuizGameContextValue {
     avatar: string
   ) => Promise<{ ok: true; sessionId: string } | { ok: false; error: string }>;
   leaveParticipant: () => void;
-  submitAnswer: (optionId: string, responseTimeMs: number) => void;
+  submitAnswer: (optionId: string, responseTimeMs: number, questionId?: string) => void;
 
   setHostSession: (sessionId: string) => void;
   startGame: () => void;
@@ -96,12 +96,14 @@ export function QuizGameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const submitAnswer = useCallback(
-    async (optionId: string, responseTimeMs: number) => {
+    async (optionId: string, responseTimeMs: number, questionId?: string) => {
       if (!participant || !participantSessionId) return;
       const session = supabaseSessionService.getSession(participantSessionId);
       if (!session) return;
       const quiz = await getQuizById(session.quizId);
-      const question = quiz?.questions[session.currentQuestionIndex];
+      const question = questionId
+        ? quiz?.questions.find((q) => q.id === questionId)
+        : quiz?.questions[session.currentQuestionIndex];
       if (!question) return;
       supabaseSessionService.submitAnswer(
         participantSessionId,

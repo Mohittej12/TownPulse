@@ -406,7 +406,9 @@ export const supabaseSessionService: SessionService = {
         if (quiz) quizCache.set(session.quizId, quiz);
       }
 
-      const currentQ = quiz?.questions[session.currentQuestionIndex];
+      const currentQ =
+        quiz?.questions.find((q) => q.id === questionId) ||
+        quiz?.questions[session.currentQuestionIndex];
       const selectedOption = currentQ?.options.find((o) => o.id === optionId);
       const isCorrect = selectedOption?.correct ?? false;
       const timeLimit = currentQ?.timeLimitSec ?? 20;
