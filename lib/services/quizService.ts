@@ -4,6 +4,7 @@ import {
   getQuizzes as getMockQuizzes,
   getQuizById as getMockQuizById,
   saveQuiz as saveMockQuiz,
+  deleteQuiz as deleteMockQuiz,
 } from "@/lib/mock/mockData";
 import { generateUuid, ensureValidUuid } from "@/lib/uuid";
 
@@ -264,12 +265,16 @@ export async function saveQuiz(quiz: Quiz): Promise<Quiz> {
 }
 
 /**
- * Delete a quiz by ID.
+ * Delete a quiz by ID from database and mock storage.
  */
 export async function deleteQuiz(id: string): Promise<void> {
+  deleteMockQuiz(id);
   if (!isSupabaseConfigured()) return;
   try {
-    await supabase.from("quizzes").delete().eq("id", id);
+    const { error } = await supabase.from("quizzes").delete().eq("id", id);
+    if (error) {
+      console.error("Failed to delete quiz from Supabase:", error);
+    }
   } catch (err) {
     console.error("Failed to delete quiz:", err);
   }

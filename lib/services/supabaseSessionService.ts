@@ -161,10 +161,15 @@ export const supabaseSessionService: SessionService = {
     sessionCache.set(sessionId, session);
     quizCache.set(quiz.id, quiz);
 
-    // Persist quiz and session in background
+    // Update quiz last_run_at and insert session row
     (async () => {
       try {
-        await saveQuiz(quiz);
+        const nowIso = new Date().toISOString();
+        await supabase
+          .from("quizzes")
+          .update({ last_run_at: nowIso })
+          .eq("id", quiz.id);
+
         await supabase.from("sessions").insert({
           id: sessionId,
           quiz_id: quiz.id,
